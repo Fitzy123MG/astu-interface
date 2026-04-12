@@ -16,18 +16,11 @@
   --muted:#9a9aa3;
 }
 
-@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
-
-*{box-sizing:border-box}
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  font-family:'JetBrains Mono','Courier New',monospace;
-}
-
-button, .card, .title, .log, .caption {
-  font-family:'JetBrains Mono','Courier New',monospace;
+  font-family:'Courier New',monospace;
 }
 
 .container{max-width:900px;margin:auto;padding:18px}
@@ -36,14 +29,12 @@ button, .card, .title, .log, .caption {
 .nav button{
   flex:1;padding:12px;border-radius:10px;
   border:1px solid var(--border);
-  background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
+  background:#0b0b11;
   color:var(--muted);
-  transition:0.2s;
 }
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
-  background:rgba(169,112,255,0.12);
 }
 
 .panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
@@ -53,20 +44,8 @@ button, .card, .title, .log, .caption {
 .highlight{color:var(--green)}
 .muted{color:var(--muted)}
 
-.hero h1{margin:0;color:var(--green);font-size:22px}
-.hero p{margin-top:6px;color:var(--muted)}
-
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-.card{border:1px solid var(--border);padding:14px;border-radius:10px;background:rgba(255,255,255,0.02)}
-
-.section{margin-top:24px;padding-top:14px;border-top:1px solid var(--border)}
-
 img{width:100%;border-radius:8px;margin-top:10px}
-.caption{font-size:12px;color:var(--muted);margin-bottom:8px}
 
-.log{padding:8px 0;border-bottom:1px solid var(--border)}
-
-/* NEW UI FIXES */
 input, textarea, button{
   background:#0b0b11;
   color:var(--text);
@@ -77,22 +56,15 @@ input, textarea, button{
   margin-top:8px;
 }
 
-button:hover{
-  border-color:var(--purple);
-  color:var(--purple);
+.plusBtn{
+  width:36px;height:36px;border-radius:10px;
+  border:1px solid var(--border);
+  background:#0b0b11;color:var(--green);
 }
 
-.plusBtn{
-  width:36px;
-  height:36px;
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#0b0b11;
-  color:var(--green);
-  font-size:18px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
+.preview{
+  margin-top:10px;
+  max-height:200px;
 }
 </style>
 </head>
@@ -102,175 +74,200 @@ button:hover{
 <div class="container">
 
 <div class="nav">
-  <button class="active" onclick="tab('home',this)">Home</button>
-  <button onclick="tab('system',this)">System</button>
-  <button onclick="tab('archive',this)">Archive</button>
-  <button onclick="tab('logs',this)">Logs</button>
-  <button onclick="tab('capsule',this)">Capsule</button>
-  <button onclick="tab('profile',this)">Profile</button>
+<button class="active" onclick="tab('home',this)">Home</button>
+<button onclick="tab('system',this)">System</button>
+<button onclick="tab('archive',this)">Archive</button>
+<button onclick="tab('logs',this)">Logs</button>
+<button onclick="tab('capsule',this)">Capsule</button>
+<button onclick="tab('profile',this)">Profile</button>
 </div>
 
 <!-- HOME -->
 <div id="home" class="panel active">
-  <div class="hero">
-    <h1>ASTU MECHANICAL INTERFACE</h1>
-    <p>Batch archive and final phase access system</p>
-  </div>
+<h2>ASTU MECHANICAL INTERFACE</h2>
+<p class="muted">Batch archive and final phase access system</p>
 </div>
 
 <!-- SYSTEM -->
 <div id="system" class="panel">
-  <div class="title">SYSTEM STATUS</div>
-  <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
-  <div class="muted">COHORT: ASTU MECHANICAL 2026</div>
-  <div class="muted">STATUS: FINAL PHASE</div>
+<div class="title">SYSTEM STATUS</div>
+<div class="highlight">UNIVERSITY COMPLETION: 50%</div>
+<div class="muted">COHORT: ASTU MECHANICAL 2026</div>
+<div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
 <!-- ARCHIVE -->
 <div id="archive" class="panel">
+<div style="display:flex;justify-content:space-between;">
+<div class="title">ARCHIVE</div>
+<button onclick="toggleArchiveInput()" class="plusBtn">+</button>
+</div>
 
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <div class="title">ARCHIVE</div>
-    <button onclick="toggleArchiveInput()" class="plusBtn">+</button>
-  </div>
+<div id="archiveInputBox" style="display:none;">
+<input type="file" id="imageInput" accept="image/*">
+<img id="preview" class="preview" style="display:none;">
+<textarea id="captionInput" placeholder="Caption..."></textarea>
+<button id="uploadBtn">UPLOAD</button>
+</div>
 
-  <div id="archiveInputBox" style="display:none;">
-    <input type="file">
-    <textarea placeholder="Caption..."></textarea>
-    <button>UPLOAD</button>
-  </div>
-
-  <img src="final-match.jpg">
-  <div class="caption">Final Match</div>
-
-  <img src="field-trip.jpg">
-  <div class="caption">Field Trip</div>
-
-  <img src="workshop.jpg">
-  <div class="caption">In the Workshop</div>
-
+<div id="archiveContainer"></div>
 </div>
 
 <!-- LOGS -->
 <div id="logs" class="panel">
-
-  <div style="display:flex;justify-content:space-between;align-items:center;">
-    <div class="title">LOG ENTRIES</div>
-    <button onclick="toggleLogInput()" class="plusBtn">+</button>
-  </div>
-
-  <div id="logInputBox" style="display:none;">
-    <textarea placeholder="Write a message..."></textarea>
-    <button>POST</button>
-  </div>
-
-  <div id="logsContainer">
-    <div class="muted">wow, so empty...</div>
-  </div>
-
+<div style="display:flex;justify-content:space-between;">
+<div class="title">LOG ENTRIES</div>
+<button onclick="toggleLogInput()" class="plusBtn">+</button>
 </div>
 
-<!-- CAPSULE (UNCHANGED) -->
+<div id="logInputBox" style="display:none;">
+<textarea id="logInput" placeholder="Write a message..."></textarea>
+
+<label class="muted">
+<input type="checkbox" id="anonCheck"> Post as anonymous
+</label>
+
+<button id="logBtn">POST</button>
+</div>
+
+<div id="logsContainer" class="muted">wow, so empty...</div>
+</div>
+
+<!-- CAPSULE -->
 <div id="capsule" class="panel">
-  <div class="title">TIME CAPSULE</div>
-
-  <button onclick="tryAccess()" style="margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--border);background:#0b0b11;color:var(--purple);width:100%">
-    UNLOCK
-  </button>
-
-  <div id="status" class="muted" style="margin-top:10px"></div>
-  <div id="countdown" class="highlight" style="margin-top:6px"></div>
-
-  <div id="content" style="display:none;margin-top:12px">
-    <div>FINAL WEEK</div>
-    <div>LATE NIGHTS</div>
-    <div>WORKSHOP DAY</div>
-  </div>
+<div class="title">TIME CAPSULE</div>
+<button onclick="tryAccess()">UNLOCK</button>
+<div id="status"></div>
+<div id="countdown"></div>
+<div id="content" style="display:none">FINAL WEEK</div>
 </div>
 
 <!-- PROFILE -->
 <div id="profile" class="panel">
-  <div class="title">PROFILE</div>
+<div class="title">PROFILE</div>
 
-  <button id="loginBtn">LOGIN</button>
-  <div id="userInfo" class="muted">NOT LOGGED IN</div>
+<button id="loginBtn">LOGIN</button>
+<div id="userInfo" class="highlight" style="margin-top:14px;">MUST LOGIN</div>
 </div>
 
 </div>
 
 <script>
 function tab(id,btn){
-  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
-  document.getElementById(id).classList.add('active')
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'))
-  btn.classList.add('active')
+document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
+document.getElementById(id).classList.add('active')
+document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'))
+btn.classList.add('active')
 }
 
 function toggleArchiveInput(){
-  const box=document.getElementById('archiveInputBox');
-  box.style.display=box.style.display==='none'?'block':'none';
+archiveInputBox.style.display = archiveInputBox.style.display==='none'?'block':'none';
 }
 
 function toggleLogInput(){
-  const box=document.getElementById('logInputBox');
-  box.style.display=box.style.display==='none'?'block':'none';
+logInputBox.style.display = logInputBox.style.display==='none'?'block':'none';
 }
+
+imageInput.onchange = () => {
+const file = imageInput.files[0];
+if(file){
+preview.src = URL.createObjectURL(file);
+preview.style.display='block';
+}
+};
 
 const target=new Date("May 27, 2026 23:59:59").getTime()
 
 function tryAccess(){
-  const now=Date.now()
-  const diff=target-now
-  const status=document.getElementById('status')
+const now=Date.now()
+const diff=target-now
+const status=document.getElementById('status')
 
-  if(diff>0){
-    status.innerHTML="ACCESS DENIED"
-  } else {
-    status.innerHTML="ACCESS GRANTED"
-    document.getElementById('content').style.display='block'
-  }
+if(diff>0){
+status.innerHTML="ACCESS DENIED"
+} else {
+status.innerHTML="ACCESS GRANTED"
+document.getElementById('content').style.display='block'
+}
 }
 
 setInterval(()=>{
-  const now=Date.now()
-  const diff=target-now
-  const el=document.getElementById('countdown')
+const now=Date.now()
+const diff=target-now
+const el=document.getElementById('countdown')
 
-  if(diff<0){
-    el.innerHTML=""
-    return
-  }
+if(diff<0){
+el.innerHTML=""
+return
+}
 
-  const d=Math.floor(diff/86400000)
-  const h=Math.floor((diff%86400000)/3600000)
-  const m=Math.floor((diff%3600000)/60000)
+const d=Math.floor(diff/86400000)
+const h=Math.floor((diff%86400000)/3600000)
+const m=Math.floor((diff%3600000)/60000)
 
-  el.innerHTML=`${d}d ${h}h ${m}m remaining`
+el.innerHTML=`${d}d ${h}h ${m}m remaining`
 },1000)
 </script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyD...",
-  authDomain: "astu-mechanical-portal.firebaseapp.com",
-  projectId: "astu-mechanical-portal",
-  appId: "1:410719511999:web:f8b2ce1d310709ff7fad0a"
-};
+const app = initializeApp({
+apiKey: "AIzaSyD...",
+authDomain: "astu-mechanical-portal.firebaseapp.com",
+projectId: "astu-mechanical-portal"
+});
 
-const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
+const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-loginBtn.onclick = async () => {
-  await signInWithPopup(auth, provider);
+// LOGIN FIX (REDIRECT)
+loginBtn.onclick = () => {
+signInWithRedirect(auth, provider);
 };
 
-onAuthStateChanged(auth, (user) => {
-  userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
+// HANDLE RETURN
+getRedirectResult(auth).catch(console.error);
+
+// USER STATE
+onAuthStateChanged(auth, user=>{
+userInfo.innerHTML = user ? "USER: "+user.displayName : "MUST LOGIN";
 });
+
+// LOG SAVE
+logBtn.onclick = async ()=>{
+const user = auth.currentUser;
+if(!user) return alert("Login first");
+
+await addDoc(collection(db,"logs"),{
+text: logInput.value,
+user: anonCheck.checked ? "Anonymous" : user.displayName
+});
+
+logInput.value="";
+loadLogs();
+};
+
+// LOAD LOGS
+async function loadLogs(){
+const snap = await getDocs(collection(db,"logs"));
+
+if(snap.empty){
+logsContainer.innerHTML="wow, so empty...";
+return;
+}
+
+logsContainer.innerHTML="";
+snap.forEach(doc=>{
+const d = doc.data();
+logsContainer.innerHTML += `<div class="log">${d.text} — ${d.user}</div>`;
+});
+}
+
+loadLogs();
 </script>
 
 </body>
