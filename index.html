@@ -38,6 +38,7 @@ button, .card, .title, .log, .caption {
   border:1px solid var(--border);
   background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
   color:var(--muted);
+  transition:0.2s;
 }
 .nav button.active{
   color:var(--purple);
@@ -65,8 +66,8 @@ img{width:100%;border-radius:8px;margin-top:10px}
 
 .log{padding:8px 0;border-bottom:1px solid var(--border)}
 
-/* 🔥 NEW INPUT STYLING */
-input, textarea, button {
+/* NEW UI FIXES */
+input, textarea, button{
   background:#0b0b11;
   color:var(--text);
   border:1px solid var(--border);
@@ -76,16 +77,11 @@ input, textarea, button {
   margin-top:8px;
 }
 
-button {
-  cursor:pointer;
-}
-
-button:hover {
+button:hover{
   border-color:var(--purple);
   color:var(--purple);
 }
 
-/* ➕ BUTTON */
 .plusBtn{
   width:36px;
   height:36px;
@@ -122,6 +118,14 @@ button:hover {
   </div>
 </div>
 
+<!-- SYSTEM -->
+<div id="system" class="panel">
+  <div class="title">SYSTEM STATUS</div>
+  <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
+  <div class="muted">COHORT: ASTU MECHANICAL 2026</div>
+  <div class="muted">STATUS: FINAL PHASE</div>
+</div>
+
 <!-- ARCHIVE -->
 <div id="archive" class="panel">
 
@@ -131,13 +135,19 @@ button:hover {
   </div>
 
   <div id="archiveInputBox" style="display:none;">
-    <input type="file" id="imageInput">
-    <textarea id="captionInput" placeholder="Caption..."></textarea>
+    <input type="file">
+    <textarea placeholder="Caption..."></textarea>
     <button>UPLOAD</button>
   </div>
 
   <img src="final-match.jpg">
   <div class="caption">Final Match</div>
+
+  <img src="field-trip.jpg">
+  <div class="caption">Field Trip</div>
+
+  <img src="workshop.jpg">
+  <div class="caption">In the Workshop</div>
 
 </div>
 
@@ -160,13 +170,22 @@ button:hover {
 
 </div>
 
-  <!-- CAPSULE (UNCHANGED) -->
+<!-- CAPSULE (UNCHANGED) -->
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
-  <button onclick="tryAccess()">UNLOCK</button>
-  <div id="status"></div>
-  <div id="countdown"></div>
-  <div id="content" style="display:none">FINAL WEEK</div>
+
+  <button onclick="tryAccess()" style="margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--border);background:#0b0b11;color:var(--purple);width:100%">
+    UNLOCK
+  </button>
+
+  <div id="status" class="muted" style="margin-top:10px"></div>
+  <div id="countdown" class="highlight" style="margin-top:6px"></div>
+
+  <div id="content" style="display:none;margin-top:12px">
+    <div>FINAL WEEK</div>
+    <div>LATE NIGHTS</div>
+    <div>WORKSHOP DAY</div>
+  </div>
 </div>
 
 <!-- PROFILE -->
@@ -196,9 +215,40 @@ function toggleLogInput(){
   const box=document.getElementById('logInputBox');
   box.style.display=box.style.display==='none'?'block':'none';
 }
+
+const target=new Date("May 27, 2026 23:59:59").getTime()
+
+function tryAccess(){
+  const now=Date.now()
+  const diff=target-now
+  const status=document.getElementById('status')
+
+  if(diff>0){
+    status.innerHTML="ACCESS DENIED"
+  } else {
+    status.innerHTML="ACCESS GRANTED"
+    document.getElementById('content').style.display='block'
+  }
+}
+
+setInterval(()=>{
+  const now=Date.now()
+  const diff=target-now
+  const el=document.getElementById('countdown')
+
+  if(diff<0){
+    el.innerHTML=""
+    return
+  }
+
+  const d=Math.floor(diff/86400000)
+  const h=Math.floor((diff%86400000)/3600000)
+  const m=Math.floor((diff%3600000)/60000)
+
+  el.innerHTML=`${d}d ${h}h ${m}m remaining`
+},1000)
 </script>
 
-<!-- 🔐 FIREBASE LOGIN ONLY -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
@@ -225,4 +275,3 @@ onAuthStateChanged(auth, (user) => {
 
 </body>
 </html>
-
