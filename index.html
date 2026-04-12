@@ -225,23 +225,35 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// ✅ persistence fix
 await setPersistence(auth, browserLocalPersistence);
 
-// login
+// LOGIN
 loginBtn.onclick = () => {
   signInWithRedirect(auth, provider);
 };
 
-// redirect handler
-getRedirectResult(auth).catch(console.error);
+// DEBUG REDIRECT RESULT
+getRedirectResult(auth)
+  .then((result) => {
+    if (result && result.user) {
+      alert("LOGIN SUCCESS: " + result.user.displayName);
+    }
+  })
+  .catch((error) => {
+    alert("LOGIN ERROR: " + error.message);
+    console.error(error);
+  });
 
-// user state
+// USER STATE
 onAuthStateChanged(auth, (user) => {
-  userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
+  if (user) {
+    userInfo.innerHTML = "USER: " + user.displayName;
+  } else {
+    userInfo.innerHTML = "NOT LOGGED IN";
+  }
 });
 
-// logs
+// LOGS
 logBtn.onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login first");
@@ -276,4 +288,4 @@ loadLogs();
 </script>
 
 </body>
-</html>
+    </html>
