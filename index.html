@@ -14,13 +14,20 @@
   --green:#00e6a3;
   --text:#e4e4e7;
   --muted:#9a9aa3;
-} 
+}
 
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&display=swap');
+
+*{box-sizing:border-box}
 body{
   margin:0;
   background:var(--bg);
   color:var(--text);
-  font-family:'Courier New',monospace;
+  font-family:'JetBrains Mono','Courier New',monospace;
+}
+
+button, .card, .title, .log, .caption {
+  font-family:'JetBrains Mono','Courier New',monospace;
 }
 
 .container{max-width:900px;margin:auto;padding:18px}
@@ -29,24 +36,68 @@ body{
 .nav button{
   flex:1;padding:12px;border-radius:10px;
   border:1px solid var(--border);
-  background:#0b0b11;
+  background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
   color:var(--muted);
 }
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
+  background:rgba(169,112,255,0.12);
 }
 
 .panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
 .panel.active{display:block}
 
 .title{color:var(--purple);font-size:12px;margin-bottom:10px}
+.highlight{color:var(--green)}
 .muted{color:var(--muted)}
 
+.hero h1{margin:0;color:var(--green);font-size:22px}
+.hero p{margin-top:6px;color:var(--muted)}
+
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.card{border:1px solid var(--border);padding:14px;border-radius:10px;background:rgba(255,255,255,0.02)}
+
+.section{margin-top:24px;padding-top:14px;border-top:1px solid var(--border)}
+
 img{width:100%;border-radius:8px;margin-top:10px}
-.caption{font-size:12px;color:var(--muted)}
+.caption{font-size:12px;color:var(--muted);margin-bottom:8px}
 
 .log{padding:8px 0;border-bottom:1px solid var(--border)}
+
+/* 🔥 NEW INPUT STYLING */
+input, textarea, button {
+  background:#0b0b11;
+  color:var(--text);
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:10px;
+  width:100%;
+  margin-top:8px;
+}
+
+button {
+  cursor:pointer;
+}
+
+button:hover {
+  border-color:var(--purple);
+  color:var(--purple);
+}
+
+/* ➕ BUTTON */
+.plusBtn{
+  width:36px;
+  height:36px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#0b0b11;
+  color:var(--green);
+  font-size:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
 </style>
 </head>
 
@@ -56,34 +107,74 @@ img{width:100%;border-radius:8px;margin-top:10px}
 
 <div class="nav">
   <button class="active" onclick="tab('home',this)">Home</button>
+  <button onclick="tab('system',this)">System</button>
   <button onclick="tab('archive',this)">Archive</button>
   <button onclick="tab('logs',this)">Logs</button>
+  <button onclick="tab('capsule',this)">Capsule</button>
+  <button onclick="tab('profile',this)">Profile</button>
 </div>
 
+<!-- HOME -->
 <div id="home" class="panel active">
-  <h2>ASTU MECHANICAL INTERFACE</h2>
+  <div class="hero">
+    <h1>ASTU MECHANICAL INTERFACE</h1>
+    <p>Batch archive and final phase access system</p>
+  </div>
+</div>
+
+<!-- ARCHIVE -->
+<div id="archive" class="panel">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="title">ARCHIVE</div>
+    <button onclick="toggleArchiveInput()" class="plusBtn">+</button>
+  </div>
+
+  <div id="archiveInputBox" style="display:none;">
+    <input type="file" id="imageInput">
+    <textarea id="captionInput" placeholder="Caption..."></textarea>
+    <button>UPLOAD</button>
+  </div>
+
+  <img src="final-match.jpg">
+  <div class="caption">Final Match</div>
+
+</div>
+
+<!-- LOGS -->
+<div id="logs" class="panel">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div class="title">LOG ENTRIES</div>
+    <button onclick="toggleLogInput()" class="plusBtn">+</button>
+  </div>
+
+  <div id="logInputBox" style="display:none;">
+    <textarea placeholder="Write a message..."></textarea>
+    <button>POST</button>
+  </div>
+
+  <div id="logsContainer">
+    <div class="muted">wow, so empty...</div>
+  </div>
+
+</div>
+
+  <!-- CAPSULE (UNCHANGED) -->
+<div id="capsule" class="panel">
+  <div class="title">TIME CAPSULE</div>
+  <button onclick="tryAccess()">UNLOCK</button>
+  <div id="status"></div>
+  <div id="countdown"></div>
+  <div id="content" style="display:none">FINAL WEEK</div>
+</div>
+
+<!-- PROFILE -->
+<div id="profile" class="panel">
+  <div class="title">PROFILE</div>
 
   <button id="loginBtn">LOGIN</button>
-  <div id="userInfo" class="muted"></div>
-</div>
-
-<div id="archive" class="panel">
-  <div class="title">ARCHIVE</div>
-
-  <input type="file" id="imageInput"><br><br>
-  <textarea id="captionInput" placeholder="Caption..."></textarea><br><br>
-  <button id="uploadBtn">UPLOAD</button>
-
-  <div id="archiveContainer"></div>
-</div>
-
-<div id="logs" class="panel">
-  <div class="title">LOGS</div>
-
-  <textarea id="logInput" placeholder="Write message..."></textarea><br><br>
-  <button id="logBtn">POST</button>
-
-  <div id="logsContainer"></div>
+  <div id="userInfo" class="muted">NOT LOGGED IN</div>
 </div>
 
 </div>
@@ -95,29 +186,34 @@ function tab(id,btn){
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'))
   btn.classList.add('active')
 }
+
+function toggleArchiveInput(){
+  const box=document.getElementById('archiveInputBox');
+  box.style.display=box.style.display==='none'?'block':'none';
+}
+
+function toggleLogInput(){
+  const box=document.getElementById('logInputBox');
+  box.style.display=box.style.display==='none'?'block':'none';
+}
 </script>
 
+<!-- 🔐 FIREBASE LOGIN ONLY -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD2eNBRZk6KVo1SqxxpgNdltWUVRJCfzAA",
+  apiKey: "AIzaSyD...",
   authDomain: "astu-mechanical-portal.firebaseapp.com",
   projectId: "astu-mechanical-portal",
-  storageBucket: "astu-mechanical-portal.firebasestorage.app",
-  messagingSenderId: "410719511999",
   appId: "1:410719511999:web:f8b2ce1d310709ff7fad0a"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const db = getFirestore(app);
-
 const provider = new GoogleAuthProvider();
 
-// LOGIN
 loginBtn.onclick = async () => {
   await signInWithPopup(auth, provider);
 };
@@ -125,80 +221,8 @@ loginBtn.onclick = async () => {
 onAuthStateChanged(auth, (user) => {
   userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
 });
-
-// IMAGE UPLOAD (Cloudinary)
-uploadBtn.onclick = async () => {
-  const user = auth.currentUser;
-  if (!user) return alert("Login first");
-
-  const file = imageInput.files[0];
-  const caption = captionInput.value;
-
-  if (!file) return alert("Select image");
-
-  const formData = new FormData();
-  formData.append("file", file);
-  formData.append("upload_preset", "astu_upload");
-
-  const res = await fetch("https://api.cloudinary.com/v1_1/djo2lhxqm/image/upload", {
-    method: "POST",
-    body: formData
-  });
-
-  const data = await res.json();
-
-  if (!data.secure_url) {
-    alert("Upload failed");
-    console.log(data);
-    return;
-  }
-  await addDoc(collection(db, "posts"), {
-    type: "image",
-    imageUrl: data.secure_url,
-    caption,
-    approved: false
-  });
-
-  alert("Submitted for approval");
-};
-
-// LOG POST
-logBtn.onclick = async () => {
-  const user = auth.currentUser;
-  if (!user) return alert("Login first");
-
-  await addDoc(collection(db, "posts"), {
-    type: "log",
-    message: logInput.value,
-    approved: false
-  });
-
-  alert("Log submitted");
-};
-
-// LOAD APPROVED POSTS
-async function load() {
-  const q = query(collection(db, "posts"), where("approved", "==", true));
-  const snap = await getDocs(q);
-
-  archiveContainer.innerHTML = "";
-  logsContainer.innerHTML = "";
-
-  snap.forEach(doc => {
-    const d = doc.data();
-
-    if (d.type === "image") {
-      archiveContainer.innerHTML += <img src="${d.imageUrl}"><div class="caption">${d.caption}</div>;
-    }
-
-    if (d.type === "log") {
-      logsContainer.innerHTML += <div class="log">${d.message}</div>;
-    }
-  });
-}
-
-load();
 </script>
 
 </body>
 </html>
+
