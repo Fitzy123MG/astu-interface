@@ -84,7 +84,6 @@ img{width:100%;border-radius:8px;margin-top:10px}
   <button onclick="tab('profile',this)">Profile</button>
 </div>
 
-<!-- HOME (UNCHANGED) -->
 <div id="home" class="panel active">
   <div class="hero">
     <h1>ASTU MECHANICAL INTERFACE</h1>
@@ -106,7 +105,6 @@ img{width:100%;border-radius:8px;margin-top:10px}
   <div class="bee">🐝</div>
 </div>
 
-<!-- SYSTEM -->
 <div id="system" class="panel">
   <div class="title">SYSTEM STATUS</div>
   <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
@@ -114,7 +112,6 @@ img{width:100%;border-radius:8px;margin-top:10px}
   <div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
-<!-- ARCHIVE (UNCHANGED for now) -->
 <div id="archive" class="panel">
   <div class="title">ARCHIVE</div>
 
@@ -128,7 +125,6 @@ img{width:100%;border-radius:8px;margin-top:10px}
   <div class="caption">In the Workshop</div>
 </div>
 
-<!-- LOGS -->
 <div id="logs" class="panel">
   <div class="title">LOG ENTRIES</div>
 
@@ -140,7 +136,6 @@ img{width:100%;border-radius:8px;margin-top:10px}
   </div>
 </div>
 
-<!-- CAPSULE (UNCHANGED) -->
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
 
@@ -158,7 +153,6 @@ img{width:100%;border-radius:8px;margin-top:10px}
   </div>
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
   <button id="loginBtn">LOGIN</button>
@@ -208,10 +202,17 @@ setInterval(()=>{
 },1000)
 </script>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getAuth, signInWithRedirect, getRedirectResult, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { 
+  getAuth, 
+  signInWithRedirect, 
+  getRedirectResult, 
+  GoogleAuthProvider, 
+  onAuthStateChanged,
+  setPersistence,
+  browserLocalPersistence
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const app = initializeApp({
@@ -224,18 +225,23 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// LOGIN (FIXED)
+// ✅ persistence fix
+await setPersistence(auth, browserLocalPersistence);
+
+// login
 loginBtn.onclick = () => {
   signInWithRedirect(auth, provider);
 };
 
+// redirect handler
 getRedirectResult(auth).catch(console.error);
 
+// user state
 onAuthStateChanged(auth, (user) => {
   userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
 });
 
-// LOGS
+// logs
 logBtn.onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login first");
