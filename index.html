@@ -25,37 +25,26 @@ body{
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
-button{
-  background:#0a0a0a;
-  color:#fff;
-  border:1px solid var(--border);
-  padding:10px 14px;
-  border-radius:12px;
-  transition:0.2s;
-}
-button:hover{
-  border-color:var(--purple);
-  color:var(--purple);
+button, .card, .title, .log, .caption {
+  font-family:'JetBrains Mono','Courier New',monospace;
 }
 
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
 .nav button{
-  flex:1;padding:12px;
+  flex:1;padding:12px;border-radius:10px;
+  border:1px solid var(--border);
+  background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
+  color:var(--muted);
 }
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
+  background:rgba(169,112,255,0.12);
 }
 
-.panel{
-  display:none;
-  background:var(--panel);
-  border:1px solid var(--border);
-  border-radius:12px;
-  padding:18px;
-}
+.panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
 .panel.active{display:block}
 
 .title{color:var(--purple);font-size:12px;margin-bottom:10px}
@@ -65,25 +54,15 @@ button:hover{
 .hero h1{margin:0;color:var(--green);font-size:22px}
 .hero p{margin-top:6px;color:var(--muted)}
 
-.grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-  margin-top:18px;
-}
-.card{
-  border:1px solid var(--border);
-  padding:14px;
-  border-radius:10px;
-  background:rgba(255,255,255,0.02);
-}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
+.card{border:1px solid var(--border);padding:14px;border-radius:10px;background:rgba(255,255,255,0.02)}
 
 .section{margin-top:24px;padding-top:14px;border-top:1px solid var(--border)}
 
-.bee{margin-top:40px;text-align:center;font-size:26px;opacity:0.8}
+.bee{margin-top:50px;text-align:center;font-size:26px;opacity:0.8}
 
 img{width:100%;border-radius:8px;margin-top:10px}
-.caption{font-size:12px;color:var(--muted);margin-bottom:8px}
+.caption{font-size:12px;color:var(--muted)}
 
 .log{padding:8px 0;border-bottom:1px solid var(--border)}
 
@@ -91,19 +70,18 @@ textarea{
   width:100%;
   margin-top:10px;
   padding:10px;
-  border-radius:12px;
+  border-radius:10px;
   background:#0a0a0a;
   color:#fff;
   border:1px solid var(--border);
 }
 
-/* ➕ Archive Button */
+/* FIXED ➕ button position */
 .addBtn{
-  position:absolute;
-  right:20px;
-  top:20px;
-  font-size:20px;
-  padding:6px 12px;
+  display:block;
+  margin-bottom:10px;
+  width:40px;
+  height:40px;
   border-radius:50%;
 }
 </style>
@@ -135,22 +113,10 @@ textarea{
     <div class="card">CAPSULE: LOCKED</div>
   </div>
 
-  <div class="section">
-    <div class="title">ACCESS</div>
-    <div class="muted">Navigate modules to view archive, logs, and capsule.</div>
-  </div>
-
   <div class="bee">🐝</div>
 </div>
 
-<div id="system" class="panel">
-  <div class="title">SYSTEM STATUS</div>
-  <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
-  <div class="muted">COHORT: ASTU MECHANICAL 2026</div>
-  <div class="muted">STATUS: FINAL PHASE</div>
-</div>
-
-<div id="archive" class="panel" style="position:relative;">
+<div id="archive" class="panel">
   <div class="title">ARCHIVE</div>
 
   <button class="addBtn">+</button>
@@ -160,9 +126,6 @@ textarea{
 
   <img src="field-trip.jpg">
   <div class="caption">Field Trip</div>
-
-  <img src="workshop.jpg">
-  <div class="caption">In the Workshop</div>
 </div>
 
 <div id="logs" class="panel">
@@ -194,11 +157,8 @@ textarea{
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
 
-  <div id="profileBox">
-    <button id="loginBtn">LOGIN</button>
-  </div>
-
-  <div id="userInfo" class="highlight" style="margin-top:14px">NOT LOGGED IN</div>
+  <div id="userInfo" class="highlight">NOT LOGGED IN</div>
+  <div id="profileBox" style="margin-top:12px"></div>
 </div>
 
 </div>
@@ -225,38 +185,20 @@ function tryAccess(){
     document.getElementById('content').style.display='block'
   }
 }
-
-setInterval(()=>{
-  const now=Date.now()
-  const diff=target-now
-  const el=document.getElementById('countdown')
-
-  if(diff<0){
-    el.innerHTML=""
-    return
-  }
-
-  const d=Math.floor(diff/86400000)
-  const h=Math.floor((diff%86400000)/3600000)
-  const m=Math.floor((diff%3600000)/60000)
-
-  el.innerHTML=`${d}d ${h}h ${m}m remaining`
-},1000)
 </script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { 
-  getAuth, 
-  signInWithPopup,
-  signOut,
-  GoogleAuthProvider, 
-  onAuthStateChanged
+  getAuth, signInWithPopup, signOut,
+  GoogleAuthProvider, onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { 
+  getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSyD2eNBRZk6KVo1SqxxpgNdltWUVRJCfzAA",
+  apiKey: "AIzaSy...",
   authDomain: "astu-mechanical-portal.firebaseapp.com",
   projectId: "astu-mechanical-portal"
 });
@@ -265,33 +207,22 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// LOGIN
-document.getElementById("loginBtn").onclick = async () => {
-  await signInWithPopup(auth, provider);
-};
-
-// AUTH STATE
+// AUTH UI
 onAuthStateChanged(auth, (user) => {
-  const profileBox = document.getElementById("profileBox");
-  const userInfo = document.getElementById("userInfo");
+  const box = document.getElementById("profileBox");
+  const info = document.getElementById("userInfo");
 
   if(user){
-    userInfo.innerHTML = "USER: " + user.displayName;
+    info.innerHTML = "USER: " + user.displayName;
 
-    profileBox.innerHTML = `<button id="logoutBtn">LOGOUT</button>`;
-
-    document.getElementById("logoutBtn").onclick = () => {
-      signOut(auth);
-    };
+    box.innerHTML = `<button id="logoutBtn">LOGOUT</button>`;
+    document.getElementById("logoutBtn").onclick = ()=>signOut(auth);
 
   } else {
-    userInfo.innerHTML = "NOT LOGGED IN";
+    info.innerHTML = "NOT LOGGED IN";
 
-    profileBox.innerHTML = `<button id="loginBtn">LOGIN</button>`;
-
-    document.getElementById("loginBtn").onclick = async () => {
-      await signInWithPopup(auth, provider);
-    };
+    box.innerHTML = `<button id="loginBtn">LOGIN</button>`;
+    document.getElementById("loginBtn").onclick = ()=>signInWithPopup(auth, provider);
   }
 });
 
@@ -304,11 +235,12 @@ document.getElementById("logBtn").onclick = async () => {
   if (!text.trim()) return;
 
   await addDoc(collection(db, "logs"), {
-    text: text,
-    user: user.displayName
+    text,
+    user: user.displayName,
+    uid: user.uid
   });
 
-  document.getElementById("logInput").value = "";
+  logInput.value="";
   loadLogs();
 };
 
@@ -320,11 +252,38 @@ async function loadLogs(){
     ? `<div class="muted">wow, so empty...</div>`
     : "";
 
-  snap.forEach(doc=>{
-    const d = doc.data();
-    container.innerHTML += `<div class="log">"${d.text}" — ${d.user}</div>`;
+  snap.forEach(d=>{
+    const data = d.data();
+    const user = auth.currentUser;
+
+    let controls = "";
+    if(user && user.uid === data.uid){
+      controls = `
+        <button onclick="deleteLog('${d.id}')">X</button>
+        <button onclick="editLog('${d.id}','${data.text}')">Edit</button>
+      `;
+    }
+
+    container.innerHTML += `
+      <div class="log">
+        "${data.text}" — ${data.user}
+        ${controls}
+      </div>`;
   });
 }
+
+window.deleteLog = async (id)=>{
+  await deleteDoc(doc(db,"logs",id));
+  loadLogs();
+};
+
+window.editLog = async (id,oldText)=>{
+  const newText = prompt("Edit message:", oldText);
+  if(newText){
+    await updateDoc(doc(db,"logs",id),{text:newText});
+    loadLogs();
+  }
+};
 
 loadLogs();
 </script>
