@@ -29,23 +29,32 @@ button, .card, .title, .log, .caption {
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
+/* ✅ BUTTON STYLE MATCHES NAV */
 button{
-  background:#000;
-  color:#fff;
+  border-radius:10px;
   border:1px solid var(--border);
+  background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
+  color:var(--muted);
+  padding:10px;
+  transition:0.2s;
+  cursor:pointer;
 }
-button:hover{background:#111;}
+button:hover{
+  color:var(--purple);
+  border-color:var(--purple);
+  background:rgba(169,112,255,0.12);
+}
 
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
 .nav button{
-  flex:1;padding:12px;border-radius:10px;
-  color:var(--muted);
+  flex:1;padding:12px;
 }
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
+  background:rgba(169,112,255,0.12);
 }
 
 .panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
@@ -63,12 +72,10 @@ button:hover{background:#111;}
 .card .label{color:var(--purple);font-size:12px}
 .card .value{color:var(--green);font-size:13px;margin-top:4px}
 
-.section{margin-top:24px;padding-top:14px;border-top:1px solid var(--border)}
-
 .bee{margin-top:50px;text-align:center;font-size:26px;opacity:0.8}
 
 img{width:100%;border-radius:8px;margin-top:10px}
-.caption{font-size:12px;color:var(--muted);margin-bottom:8px}
+.caption{font-size:12px;color:var(--muted)}
 
 .log{padding:8px 0;border-bottom:1px solid var(--border)}
 
@@ -77,9 +84,23 @@ textarea{
   margin-top:10px;
   padding:10px;
   border-radius:10px;
-  background:#0a0a0a;
-  color:#fff;
+  background:#0b0b11;
+  color:var(--text);
   border:1px solid var(--border);
+}
+
+#logBtn{
+  margin-top:8px;
+  width:100%;
+}
+
+.addBtn{
+  position:absolute;
+  right:16px;
+  top:-10px;
+  width:36px;
+  height:36px;
+  border-radius:50%;
 }
 </style>
 </head>
@@ -97,6 +118,7 @@ textarea{
   <button onclick="tab('profile',this)">Profile</button>
 </div>
 
+<!-- HOME -->
 <div id="home" class="panel active">
   <div class="hero">
     <h1>ASTU MECHANICAL INTERFACE</h1>
@@ -110,23 +132,20 @@ textarea{
     <div class="card"><div class="label">CAPSULE</div><div class="value">LOCKED</div></div>
   </div>
 
-  <div class="section">
-    <div class="title">ACCESS</div>
-    <div class="muted">Navigate modules to view archive, logs, and capsule.</div>
-  </div>
-
   <div class="bee">🐝</div>
 </div>
 
+<!-- SYSTEM -->
 <div id="system" class="panel">
   <div class="title">SYSTEM STATUS</div>
   <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
   <div class="muted">COHORT: ASTU MECHANICAL 2026</div>
-  <div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
-<div id="archive" class="panel">
+<!-- ARCHIVE -->
+<div id="archive" class="panel" style="position:relative;">
   <div class="title">ARCHIVE</div>
+  <button class="addBtn">+</button>
 
   <img src="final-match.jpg">
   <div class="caption">Final Match</div>
@@ -138,38 +157,38 @@ textarea{
   <div class="caption">In the Workshop</div>
 </div>
 
+<!-- LOGS -->
 <div id="logs" class="panel">
   <div class="title">LOG ENTRIES</div>
 
   <textarea id="logInput" placeholder="Write a message..."></textarea>
   <button id="logBtn">POST</button>
 
-  <div id="logsContainer">
-    <div class="muted">wow, so empty...</div>
-  </div>
+  <div id="logsContainer"></div>
 </div>
 
+<!-- CAPSULE -->
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
 
-  <button onclick="tryAccess()" style="margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--border);width:100%">
-    UNLOCK
-  </button>
+  <button onclick="tryAccess()">UNLOCK</button>
 
-  <div id="status" class="muted" style="margin-top:10px"></div>
-  <div id="countdown" class="highlight" style="margin-top:6px"></div>
+  <div id="status" class="muted"></div>
+  <div id="countdown" class="highlight"></div>
 
-  <div id="content" style="display:none;margin-top:12px">
-    <div>FINAL WEEK</div>
-    <div>LATE NIGHTS</div>
-    <div>WORKSHOP DAY</div>
+  <div id="content" style="display:none">
+    FINAL WEEK<br>LATE NIGHTS<br>WORKSHOP DAY
   </div>
 </div>
 
+<!-- PROFILE -->
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
-  <button id="loginBtn">LOGIN</button>
-  <div id="userInfo" class="highlight" style="margin-top:14px">NOT LOGGED IN</div>
+
+  <div id="userInfo" class="highlight">NOT LOGGED IN</div>
+
+  <button id="loginBtn" style="margin-top:14px;">LOGIN</button>
+  <button id="logoutBtn" style="display:none;margin-top:8px;">LOGOUT</button>
 </div>
 
 </div>
@@ -184,46 +203,32 @@ function tab(id,btn){
 
 const target=new Date("May 27, 2026 23:59:59").getTime()
 
-function tryAccess(){
-  const now=Date.now()
-  const diff=target-now
-  const status=document.getElementById('status')
-
-  if(diff>0){
-    status.innerHTML="ACCESS DENIED"
-  } else {
-    status.innerHTML="ACCESS GRANTED"
-    document.getElementById('content').style.display='block'
-  }
-}
-
 setInterval(()=>{
   const now=Date.now()
   const diff=target-now
-  const el=document.getElementById('countdown')
-
-  if(diff<0){
-    el.innerHTML=""
-    return
-  }
+  if(diff<0)return
 
   const d=Math.floor(diff/86400000)
   const h=Math.floor((diff%86400000)/3600000)
   const m=Math.floor((diff%3600000)/60000)
 
-  el.innerHTML=`${d}d ${h}h ${m}m remaining`
+  document.getElementById('countdown').innerHTML=`${d}d ${h}h ${m}m remaining`
 },1000)
+
+function tryAccess(){
+  if(Date.now()<target){
+    status.innerHTML="ACCESS DENIED"
+  } else {
+    status.innerHTML="ACCESS GRANTED"
+    content.style.display='block'
+  }
+}
 </script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { 
-  getAuth, 
-  signInWithPopup,
-  GoogleAuthProvider, 
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD2eNBRZk6KVo1SqxxpgNdltWUVRJCfzAA",
@@ -235,51 +240,89 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// 🔥 POPUP LOGIN
-loginBtn.onclick = async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    userInfo.innerHTML = "USER: " + result.user.displayName;
-  } catch (err) {
-    alert("Login failed: " + err.message);
-  }
-};
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userInfo = document.getElementById("userInfo");
 
-// 🔥 AUTH STATE
+// LOGIN
+loginBtn.onclick = () => signInWithPopup(auth, provider);
+
+// LOGOUT
+logoutBtn.onclick = () => signOut(auth);
+
+// AUTH STATE
 onAuthStateChanged(auth, (user) => {
-  userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
+  if(user){
+    userInfo.innerHTML = "USER: " + user.displayName;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "block";
+  } else {
+    userInfo.innerHTML = "NOT LOGGED IN";
+    loginBtn.style.display = "block";
+    logoutBtn.style.display = "none";
+  }
 });
 
-// 🔥 LOGS
-logBtn.onclick = async () => {
-  const user = auth.currentUser;
-  if (!user) return alert("Login first");
+// POST LOG
+document.getElementById("logBtn").onclick = async () => {
+  if(!auth.currentUser) return alert("Login first");
 
-  if (!logInput.value.trim()) return;
+  const text = logInput.value;
+  if(!text.trim()) return;
 
-  await addDoc(collection(db, "logs"), {
-    text: logInput.value,
-    user: user.displayName
+  await addDoc(collection(db,"logs"),{
+    text,
+    user: auth.currentUser.displayName,
+    uid: auth.currentUser.uid
   });
 
-  logInput.value = "";
+  logInput.value="";
   loadLogs();
 };
 
+// LOAD LOGS
 async function loadLogs(){
-  const snap = await getDocs(collection(db, "logs"));
+  const snap = await getDocs(collection(db,"logs"));
+  logsContainer.innerHTML = "";
 
-  if (snap.empty){
+  if(snap.empty){
     logsContainer.innerHTML = `<div class="muted">wow, so empty...</div>`;
     return;
   }
 
-  logsContainer.innerHTML = "";
-  snap.forEach(doc=>{
-    const d = doc.data();
-    logsContainer.innerHTML += `<div class="log">"${d.text}" — ${d.user}</div>`;
+  snap.forEach(d=>{
+    const data = d.data();
+
+    let action = "";
+
+    if(auth.currentUser && auth.currentUser.uid === data.uid){
+      action = `<span style="float:right;cursor:pointer;" onclick="editLog('${d.id}','${data.text}')">✏️</span>`;
+    } else {
+      action = `<span style="float:right;cursor:pointer;">⚠️</span>`;
+    }
+
+    logsContainer.innerHTML += `
+      <div class="log">
+        "${data.text}" — ${data.user}
+        ${action}
+      </div>
+    `;
   });
 }
+
+// EDIT / DELETE
+window.editLog = async (id, oldText)=>{
+  const input = prompt("Edit or type DELETE:", oldText);
+  if(!input) return;
+
+  if(input.toLowerCase()==="delete"){
+    await deleteDoc(doc(db,"logs",id));
+  }else{
+    await updateDoc(doc(db,"logs",id),{text:input});
+  }
+
+  loadLogs();
+};
 
 loadLogs();
 </script>
