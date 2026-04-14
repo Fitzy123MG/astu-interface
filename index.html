@@ -29,23 +29,18 @@ button, .card, .title, .log, .caption {
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
-/* 🔥 DARK BUTTON IMPROVEMENT (your request) */
 button{
   background:#000;
   color:#fff;
   border:1px solid var(--border);
 }
-
-button:hover{
-  background:#111;
-}
+button:hover{background:#111;}
 
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
 .nav button{
   flex:1;padding:12px;border-radius:10px;
-  background:#000;
   color:var(--muted);
 }
 .nav button.active{
@@ -224,8 +219,7 @@ setInterval(()=>{
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { 
   getAuth, 
-  signInWithRedirect, 
-  getRedirectResult, 
+  signInWithPopup,
   GoogleAuthProvider, 
   onAuthStateChanged,
   setPersistence,
@@ -245,16 +239,23 @@ const provider = new GoogleAuthProvider();
 
 await setPersistence(auth, browserLocalPersistence);
 
-loginBtn.onclick = () => {
-  signInWithRedirect(auth, provider);
+// ✅ POPUP LOGIN (FINAL FIX)
+loginBtn.onclick = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    userInfo.innerHTML = "USER: " + result.user.displayName;
+  } catch (err) {
+    alert("Login failed: " + err.message);
+    console.error(err);
+  }
 };
 
-getRedirectResult(auth).catch(console.error);
-
+// ✅ AUTO UPDATE USER STATE
 onAuthStateChanged(auth, (user) => {
   userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
 });
 
+// LOGS
 logBtn.onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login first");
