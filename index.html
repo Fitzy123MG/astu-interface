@@ -30,28 +30,22 @@ button, .card, .title, .log, .caption {
 }
 
 button{
-  border-radius:10px;
+  background:#000;
+  color:#fff;
   border:1px solid var(--border);
-  background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
-  color:var(--muted);
-  padding:10px;
 }
-
-button:hover{
-  color:var(--purple);
-  border-color:var(--purple);
-}
+button:hover{background:#111;}
 
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
 .nav button{
-  flex:1;padding:12px;
+  flex:1;padding:12px;border-radius:10px;
+  color:var(--muted);
 }
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
-  background:rgba(169,112,255,0.12);
 }
 
 .panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
@@ -83,19 +77,9 @@ textarea{
   margin-top:10px;
   padding:10px;
   border-radius:10px;
-  background:#0b0b11;
-  color:var(--text);
+  background:#0a0a0a;
+  color:#fff;
   border:1px solid var(--border);
-}
-
-/* ➕ fixed */
-.addBtn{
-  position:absolute;
-  right:16px;
-  top:16px;
-  width:36px;
-  height:36px;
-  border-radius:50%;
 }
 </style>
 </head>
@@ -113,7 +97,6 @@ textarea{
   <button onclick="tab('profile',this)">Profile</button>
 </div>
 
-<!-- HOME -->
 <div id="home" class="panel active">
   <div class="hero">
     <h1>ASTU MECHANICAL INTERFACE</h1>
@@ -127,10 +110,14 @@ textarea{
     <div class="card"><div class="label">CAPSULE</div><div class="value">LOCKED</div></div>
   </div>
 
+  <div class="section">
+    <div class="title">ACCESS</div>
+    <div class="muted">Navigate modules to view archive, logs, and capsule.</div>
+  </div>
+
   <div class="bee">🐝</div>
 </div>
 
-<!-- SYSTEM -->
 <div id="system" class="panel">
   <div class="title">SYSTEM STATUS</div>
   <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
@@ -138,45 +125,51 @@ textarea{
   <div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
-<!-- ARCHIVE -->
-<div id="archive" class="panel" style="position:relative;">
+<div id="archive" class="panel">
   <div class="title">ARCHIVE</div>
-  <button class="addBtn">+</button>
 
   <img src="final-match.jpg">
   <div class="caption">Final Match</div>
+
+  <img src="field-trip.jpg">
+  <div class="caption">Field Trip</div>
+
+  <img src="workshop.jpg">
+  <div class="caption">In the Workshop</div>
 </div>
 
-<!-- LOGS -->
 <div id="logs" class="panel">
   <div class="title">LOG ENTRIES</div>
 
   <textarea id="logInput" placeholder="Write a message..."></textarea>
   <button id="logBtn">POST</button>
 
-  <div id="logsContainer"></div>
-</div>
-
-<!-- CAPSULE -->
-<div id="capsule" class="panel">
-  <div class="title">TIME CAPSULE</div>
-
-  <button onclick="tryAccess()">UNLOCK</button>
-
-  <div id="status" class="muted"></div>
-  <div id="countdown" class="highlight"></div>
-
-  <div id="content" style="display:none">
-    FINAL WEEK<br>LATE NIGHTS<br>WORKSHOP DAY
+  <div id="logsContainer">
+    <div class="muted">wow, so empty...</div>
   </div>
 </div>
 
-<!-- PROFILE -->
+<div id="capsule" class="panel">
+  <div class="title">TIME CAPSULE</div>
+
+  <button onclick="tryAccess()" style="margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--border);width:100%">
+    UNLOCK
+  </button>
+
+  <div id="status" class="muted" style="margin-top:10px"></div>
+  <div id="countdown" class="highlight" style="margin-top:6px"></div>
+
+  <div id="content" style="display:none;margin-top:12px">
+    <div>FINAL WEEK</div>
+    <div>LATE NIGHTS</div>
+    <div>WORKSHOP DAY</div>
+  </div>
+</div>
+
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
-
-  <div id="userInfo" class="highlight">NOT LOGGED IN</div>
-  <div id="profileBox" style="margin-top:10px"></div>
+  <button id="loginBtn">LOGIN</button>
+  <div id="userInfo" class="highlight" style="margin-top:14px">NOT LOGGED IN</div>
 </div>
 
 </div>
@@ -189,103 +182,106 @@ function tab(id,btn){
   btn.classList.add('active')
 }
 
-// countdown restored
 const target=new Date("May 27, 2026 23:59:59").getTime()
+
+function tryAccess(){
+  const now=Date.now()
+  const diff=target-now
+  const status=document.getElementById('status')
+
+  if(diff>0){
+    status.innerHTML="ACCESS DENIED"
+  } else {
+    status.innerHTML="ACCESS GRANTED"
+    document.getElementById('content').style.display='block'
+  }
+}
+
 setInterval(()=>{
   const now=Date.now()
   const diff=target-now
-  if(diff<0)return
+  const el=document.getElementById('countdown')
+
+  if(diff<0){
+    el.innerHTML=""
+    return
+  }
 
   const d=Math.floor(diff/86400000)
   const h=Math.floor((diff%86400000)/3600000)
   const m=Math.floor((diff%3600000)/60000)
 
-  document.getElementById('countdown').innerHTML=`${d}d ${h}h ${m}m remaining`
+  el.innerHTML=`${d}d ${h}h ${m}m remaining`
 },1000)
-
-function tryAccess(){
-  if(Date.now()<target){
-    status.innerHTML="ACCESS DENIED"
-  } else {
-    status.innerHTML="ACCESS GRANTED"
-    content.style.display='block'
-  }
-}
 </script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
-import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { 
+  getAuth, 
+  signInWithPopup,
+  GoogleAuthProvider, 
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSy...",
+  apiKey: "AIzaSyD2eNBRZk6KVo1SqxxpgNdltWUVRJCfzAA",
   authDomain: "astu-mechanical-portal.firebaseapp.com",
   projectId: "astu-mechanical-portal"
 });
 
-const auth=getAuth(app)
-const db=getFirestore(app)
-const provider=new GoogleAuthProvider()
+const auth = getAuth(app);
+const db = getFirestore(app);
+const provider = new GoogleAuthProvider();
 
-onAuthStateChanged(auth,user=>{
-  const box=profileBox
-
-  if(user){
-    userInfo.innerHTML="USER: "+user.displayName
-    box.innerHTML=`<button id="logoutBtn">LOGOUT</button>`
-    document.getElementById("logoutBtn").onclick=()=>signOut(auth)
-  }else{
-    userInfo.innerHTML="NOT LOGGED IN"
-    box.innerHTML=`<button id="loginBtn">LOGIN</button>`
-    document.getElementById("loginBtn").onclick=()=>signInWithPopup(auth,provider)
+// 🔥 POPUP LOGIN
+loginBtn.onclick = async () => {
+  try {
+    const result = await signInWithPopup(auth, provider);
+    userInfo.innerHTML = "USER: " + result.user.displayName;
+  } catch (err) {
+    alert("Login failed: " + err.message);
   }
-})
+};
 
-logBtn.onclick=async()=>{
-  if(!auth.currentUser)return alert("Login first")
+// 🔥 AUTH STATE
+onAuthStateChanged(auth, (user) => {
+  userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
+});
 
-  await addDoc(collection(db,"logs"),{
-    text:logInput.value,
-    user:auth.currentUser.displayName,
-    uid:auth.currentUser.uid
-  })
+// 🔥 LOGS
+logBtn.onclick = async () => {
+  const user = auth.currentUser;
+  if (!user) return alert("Login first");
 
-  logInput.value=""
-  loadLogs()
-}
+  if (!logInput.value.trim()) return;
+
+  await addDoc(collection(db, "logs"), {
+    text: logInput.value,
+    user: user.displayName
+  });
+
+  logInput.value = "";
+  loadLogs();
+};
 
 async function loadLogs(){
-  const snap=await getDocs(collection(db,"logs"))
-  logsContainer.innerHTML=""
+  const snap = await getDocs(collection(db, "logs"));
 
-  snap.forEach(d=>{
-    const data=d.data()
-    let controls=""
-
-    if(auth.currentUser && auth.currentUser.uid===data.uid){
-      controls=`<button onclick="del('${d.id}')">X</button>
-                <button onclick="edit('${d.id}','${data.text}')">Edit</button>`
-    }
-
-    logsContainer.innerHTML+=`<div class="log">"${data.text}" — ${data.user} ${controls}</div>`
-  })
-}
-
-window.del=async(id)=>{
-  await deleteDoc(doc(db,"logs",id))
-  loadLogs()
-}
-
-window.edit=async(id,oldText)=>{
-  const t=prompt("Edit:",oldText)
-  if(t){
-    await updateDoc(doc(db,"logs",id),{text:t})
-    loadLogs()
+  if (snap.empty){
+    logsContainer.innerHTML = `<div class="muted">wow, so empty...</div>`;
+    return;
   }
+
+  logsContainer.innerHTML = "";
+  snap.forEach(doc=>{
+    const d = doc.data();
+    logsContainer.innerHTML += `<div class="log">"${d.text}" — ${d.user}</div>`;
+  });
 }
 
-loadLogs()
+loadLogs();
 </script>
 
 </body>
