@@ -115,7 +115,7 @@ textarea{
     <div class="muted">Navigate modules to view archive, logs, and capsule.</div>
   </div>
 
-  <div class="bee">🐝</div>
+  <div class="bee">🤙</div>
 </div>
 
 <div id="system" class="panel">
@@ -221,9 +221,7 @@ import {
   getAuth, 
   signInWithPopup,
   GoogleAuthProvider, 
-  onAuthStateChanged,
-  setPersistence,
-  browserLocalPersistence
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
@@ -237,25 +235,22 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-await setPersistence(auth, browserLocalPersistence);
-
-// ✅ POPUP LOGIN (FINAL FIX)
+// 🔥 POPUP LOGIN
 loginBtn.onclick = async () => {
   try {
     const result = await signInWithPopup(auth, provider);
     userInfo.innerHTML = "USER: " + result.user.displayName;
   } catch (err) {
     alert("Login failed: " + err.message);
-    console.error(err);
   }
 };
 
-// ✅ AUTO UPDATE USER STATE
+// 🔥 AUTH STATE
 onAuthStateChanged(auth, (user) => {
   userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
 });
 
-// LOGS
+// 🔥 LOGS
 logBtn.onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login first");
