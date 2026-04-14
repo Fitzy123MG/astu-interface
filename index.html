@@ -35,25 +35,20 @@ button{
   background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
   color:var(--muted);
   padding:10px;
-  transition:0.2s;
   cursor:pointer;
 }
 button:hover{
   color:var(--purple);
   border-color:var(--purple);
-  background:rgba(169,112,255,0.12);
 }
 
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
-.nav button{
-  flex:1;padding:12px;
-}
+.nav button{flex:1;padding:12px}
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
-  background:rgba(169,112,255,0.12);
 }
 
 .panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
@@ -68,23 +63,24 @@ button:hover{
 
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
 .card{border:1px solid var(--border);padding:14px;border-radius:10px;background:rgba(255,255,255,0.02)}
-.card .label{color:var(--purple);font-size:12px}
-.card .value{color:var(--green);font-size:13px;margin-top:4px}
 
 .bee{margin-top:50px;text-align:center;font-size:26px;opacity:0.8}
 
 img{width:100%;border-radius:8px;margin-top:10px}
-.caption{font-size:12px;color:var(--muted)}
 
 .captionRow{
   display:flex;
   justify-content:space-between;
   font-size:12px;
   color:var(--muted);
-  margin-bottom:8px;
 }
 
-.log{padding:8px 0;border-bottom:1px solid var(--border)}
+.iconBtn{
+  float:right;
+  cursor:pointer;
+  opacity:0.6;
+}
+.iconBtn:hover{opacity:1;color:var(--purple)}
 
 textarea{
   width:100%;
@@ -94,24 +90,6 @@ textarea{
   background:#0b0b11;
   color:var(--text);
   border:1px solid var(--border);
-}
-
-#logBtn{margin-top:8px;width:100%}
-
-.iconBtn{
-  float:right;
-  cursor:pointer;
-  opacity:0.6;
-  font-weight:bold;
-}
-.iconBtn:hover{
-  opacity:1;
-  color:var(--purple);
-}
-
-#uploadBtn{
-  float:right;
-  margin-top:-28px;
 }
 </style>
 </head>
@@ -134,34 +112,24 @@ textarea{
     <h1>ASTU MECHANICAL INTERFACE</h1>
     <p>Batch archive and final phase access system</p>
   </div>
-
   <div class="grid">
-    <div class="card"><div class="label">SYSTEM</div><div class="value">STATUS: ACTIVE</div></div>
-    <div class="card"><div class="label">ARCHIVE</div><div class="value">MEMORY STORAGE</div></div>
-    <div class="card"><div class="label">LOGS</div><div class="value">MESSAGE RECORD</div></div>
-    <div class="card"><div class="label">CAPSULE</div><div class="value">LOCKED</div></div>
+    <div class="card">SYSTEM: ACTIVE</div>
+    <div class="card">ARCHIVE: STORAGE</div>
+    <div class="card">LOGS: RECORD</div>
+    <div class="card">CAPSULE: LOCKED</div>
   </div>
-
   <div class="bee">🐝</div>
-</div>
-
-<div id="system" class="panel">
-  <div class="title">SYSTEM STATUS</div>
-  <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
-  <div class="muted">COHORT: ASTU MECHANICAL 2026</div>
-  <div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
 <div id="archive" class="panel">
   <div class="title">ARCHIVE</div>
 
-  <input type="file" id="imageInput" style="display:none" accept="image/*">
+  <input type="file" id="imageInput" hidden>
   <button id="uploadBtn">+ Add Photo</button>
 
-  <textarea id="captionInput" placeholder="Add caption (optional)..." style="display:none"></textarea>
-  <button id="postImageBtn" style="display:none;margin-top:8px;">POST</button>
-
-  <div id="uploadStatus" class="muted"></div>
+  <textarea id="captionInput" style="display:none"></textarea>
+  <button id="postImageBtn" style="display:none">POST</button>
+  <div id="uploadStatus"></div>
 
   <div id="archiveContainer"></div>
 </div>
@@ -169,33 +137,24 @@ textarea{
 <div id="logs" class="panel">
   <div class="title">LOG ENTRIES</div>
 
-  <textarea id="logInput" placeholder="Write a message..."></textarea>
+  <textarea id="logInput"></textarea>
   <button id="logBtn">POST</button>
-  <button id="deleteBtn" style="display:none;margin-top:6px;">DELETE</button>
+  <button id="deleteBtn" style="display:none">DELETE</button>
 
   <div id="logsContainer"></div>
 </div>
 
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
-
-  <button onclick="tryAccess()" style="margin-top:14px;">UNLOCK</button>
-
-  <div id="status" class="muted" style="margin-top:12px"></div>
-  <div id="countdown" class="highlight" style="margin-top:10px"></div>
-
-  <div id="content" style="display:none;margin-top:12px">
-    FINAL WEEK<br>LATE NIGHTS<br>WORKSHOP DAY
-  </div>
+  <button onclick="tryAccess()">UNLOCK</button>
+  <div id="status"></div>
+  <div id="countdown"></div>
 </div>
 
 <div id="profile" class="panel">
-  <div class="title">PROFILE</div>
-
-  <div id="userInfo" class="highlight">NOT LOGGED IN</div>
-
-  <button id="loginBtn" style="margin-top:14px;">LOGIN</button>
-  <button id="logoutBtn" style="display:none;margin-top:8px;">LOGOUT</button>
+  <div id="userInfo">NOT LOGGED IN</div>
+  <button id="loginBtn">LOGIN</button>
+  <button id="logoutBtn" style="display:none">LOGOUT</button>
 </div>
 
 </div>
@@ -204,33 +163,7 @@ textarea{
 function tab(id,btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'))
   document.getElementById(id).classList.add('active')
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'))
-  btn.classList.add('active')
 }
-
-const target=new Date("May 27, 2026 23:59:59").getTime()
-
-function tryAccess(){
-  const now = Date.now();
-  if(now < target){
-    status.innerHTML="ACCESS DENIED";
-  } else {
-    status.innerHTML="ACCESS GRANTED";
-    content.style.display='block';
-  }
-}
-
-setInterval(()=>{
-  const now=Date.now()
-  const diff=target-now
-  if(diff<0)return
-
-  const d=Math.floor(diff/86400000)
-  const h=Math.floor((diff%86400000)/3600000)
-  const m=Math.floor((diff%3600000)/60000)
-
-  countdown.innerHTML=`${d}d ${h}h ${m}m remaining`
-},1000)
 </script>
 
 <script type="module">
@@ -239,7 +172,7 @@ import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChang
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSyD2eNBRZk6KVo1SqxxpgNdltWUVRJCfzAA",
+  apiKey: "AIzaSy...",
   authDomain: "astu-mechanical-portal.firebaseapp.com",
   projectId: "astu-mechanical-portal"
 });
@@ -251,109 +184,109 @@ const provider = new GoogleAuthProvider();
 loginBtn.onclick = () => signInWithPopup(auth, provider);
 logoutBtn.onclick = () => signOut(auth);
 
-const uploadBtn = document.getElementById("uploadBtn");
-const imageInput = document.getElementById("imageInput");
-const captionInput = document.getElementById("captionInput");
-const postImageBtn = document.getElementById("postImageBtn");
-const uploadStatus = document.getElementById("uploadStatus");
-
-let selectedFile = null;
-
-uploadBtn.onclick = ()=>{
-  if(!auth.currentUser) return alert("Login first");
-  imageInput.click();
-};
-
-imageInput.onchange = ()=>{
-  selectedFile = imageInput.files[0];
-  if(!selectedFile) return;
-
-  captionInput.style.display = "block";
-  postImageBtn.style.display = "block";
-};
-
-postImageBtn.onclick = async ()=>{
-  if(!selectedFile) return;
-
-  uploadStatus.innerHTML = "Uploading...";
-  postImageBtn.disabled = true;
-
-  const formData = new FormData();
-  formData.append("file", selectedFile);
-  formData.append("upload_preset", "astu_upload");
-
-  const res = await fetch("https://api.cloudinary.com/v1_1/djo2lhxqm/image/upload", {
-    method:"POST",
-    body:formData
-  });
-
-  const data = await res.json();
-
-  await addDoc(collection(db,"archive"),{
-    image: data.secure_url,
-    caption: captionInput.value || "",
-    user: auth.currentUser.displayName
-  });
-
-  uploadStatus.innerHTML = "";
-  postImageBtn.disabled = false;
-
-  captionInput.value="";
-  captionInput.style.display="none";
-  postImageBtn.style.display="none";
-  selectedFile=null;
-
+onAuthStateChanged(auth, (user)=>{
+  userInfo.innerHTML = user ? "USER: "+user.displayName : "NOT LOGGED IN";
+  loginBtn.style.display = user ? "none":"block";
+  logoutBtn.style.display = user ? "block":"none";
+  loadLogs();
   loadArchive();
-};
+});
 
-async function loadArchive(){
-  const snap = await getDocs(collection(db,"archive"));
-  archiveContainer.innerHTML="";
-
-  if(snap.empty){
-    archiveContainer.innerHTML = `<div class="muted">wow, so empty...</div>`;
-    return;
-  }
-
-  snap.forEach(d=>{
-    const data = d.data();
-
-    archiveContainer.innerHTML += `
-      <img src="${data.image}">
-      <div class="captionRow">
-        <span>${data.caption || ""}</span>
-        <span>${data.user}</span>
-      </div>
-    `;
-  });
-}
-
-async function loadLogs(){
-  const snap = await getDocs(collection(db,"logs"));
-  logsContainer.innerHTML = "";
-
-  snap.forEach(d=>{
-    const data = d.data();
-    logsContainer.innerHTML += `<div class="log">"${data.text}"</div>`;
-  });
-}
-
+// LOGS
 logBtn.onclick = async ()=>{
   if(!auth.currentUser) return alert("Login first");
 
   await addDoc(collection(db,"logs"),{
-    text: logInput.value,
-    user: auth.currentUser.displayName
+    text:logInput.value,
+    user:auth.currentUser.displayName,
+    uid:auth.currentUser.uid
   });
 
   logInput.value="";
   loadLogs();
 };
 
-onAuthStateChanged(auth, ()=>{
-  loadLogs();
-  loadArchive();
-});
+async function loadLogs(){
+  const snap = await getDocs(collection(db,"logs"));
+  logsContainer.innerHTML="";
+
+  snap.forEach(d=>{
+    const data=d.data();
+    let action="";
+
+    if(auth.currentUser && data.uid===auth.currentUser.uid){
+      action=`<span class="iconBtn" onclick="editLog('${d.id}','${data.text}')">✎</span>`;
+    } else {
+      action=`<span class="iconBtn">!</span>`;
+    }
+
+    logsContainer.innerHTML+=`
+      <div class="log">"${data.text}" — ${data.user}${action}</div>
+    `;
+  });
+}
+
+// ARCHIVE
+uploadBtn.onclick=()=>{
+  if(!auth.currentUser) return alert("Login first");
+  imageInput.click();
+};
+
+imageInput.onchange=()=>{
+  captionInput.style.display="block";
+  postImageBtn.style.display="block";
+};
+
+postImageBtn.onclick=async()=>{
+  uploadStatus.innerHTML="Uploading...";
+  postImageBtn.style.display="none";
+
+  const fd=new FormData();
+  fd.append("file",imageInput.files[0]);
+  fd.append("upload_preset","astu_upload");
+
+  try{
+    const res=await fetch("https://api.cloudinary.com/v1_1/djo2lhxqm/image/upload",{method:"POST",body:fd});
+    const data=await res.json();
+
+    await addDoc(collection(db,"archive"),{
+      image:data.secure_url,
+      caption:captionInput.value,
+      user:auth.currentUser.displayName,
+      uid:auth.currentUser.uid
+    });
+
+    uploadStatus.innerHTML="";
+    captionInput.style.display="none";
+    loadArchive();
+  }catch{
+    uploadStatus.innerHTML="Upload failed!";
+    postImageBtn.style.display="block";
+  }
+};
+
+async function loadArchive(){
+  const snap=await getDocs(collection(db,"archive"));
+  archiveContainer.innerHTML="";
+
+  snap.forEach(d=>{
+    const data=d.data();
+    let action="";
+
+    if(auth.currentUser && data.uid===auth.currentUser.uid){
+      action=`<span class="iconBtn">✎</span>`;
+    }
+
+    archiveContainer.innerHTML+=`
+      <img src="${data.image}">
+      <div class="captionRow">
+        <span>${data.caption}</span>
+        <span>${data.user}</span>
+      </div>
+      ${action}
+    `;
+  });
+}
 </script>
 
 </body>
