@@ -25,30 +25,37 @@ body{
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
-button, .card, .title, .log, .caption {
-  font-family:'JetBrains Mono','Courier New',monospace;
-}
-
 button{
-  background:#000;
+  background:#0a0a0a;
   color:#fff;
   border:1px solid var(--border);
+  padding:10px 14px;
+  border-radius:12px;
+  transition:0.2s;
 }
-button:hover{background:#111;}
+button:hover{
+  border-color:var(--purple);
+  color:var(--purple);
+}
 
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
 .nav button{
-  flex:1;padding:12px;border-radius:10px;
-  color:var(--muted);
+  flex:1;padding:12px;
 }
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
 }
 
-.panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
+.panel{
+  display:none;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:18px;
+}
 .panel.active{display:block}
 
 .title{color:var(--purple);font-size:12px;margin-bottom:10px}
@@ -58,14 +65,22 @@ button:hover{background:#111;}
 .hero h1{margin:0;color:var(--green);font-size:22px}
 .hero p{margin-top:6px;color:var(--muted)}
 
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
-.card{border:1px solid var(--border);padding:14px;border-radius:10px;background:rgba(255,255,255,0.02)}
-.card .label{color:var(--purple);font-size:12px}
-.card .value{color:var(--green);font-size:13px;margin-top:4px}
+.grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:18px;
+}
+.card{
+  border:1px solid var(--border);
+  padding:14px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.02);
+}
 
 .section{margin-top:24px;padding-top:14px;border-top:1px solid var(--border)}
 
-.bee{margin-top:50px;text-align:center;font-size:26px;opacity:0.8}
+.bee{margin-top:40px;text-align:center;font-size:26px;opacity:0.8}
 
 img{width:100%;border-radius:8px;margin-top:10px}
 .caption{font-size:12px;color:var(--muted);margin-bottom:8px}
@@ -76,10 +91,20 @@ textarea{
   width:100%;
   margin-top:10px;
   padding:10px;
-  border-radius:10px;
+  border-radius:12px;
   background:#0a0a0a;
   color:#fff;
   border:1px solid var(--border);
+}
+
+/* ➕ Archive Button */
+.addBtn{
+  position:absolute;
+  right:20px;
+  top:20px;
+  font-size:20px;
+  padding:6px 12px;
+  border-radius:50%;
 }
 </style>
 </head>
@@ -104,10 +129,10 @@ textarea{
   </div>
 
   <div class="grid">
-    <div class="card"><div class="label">SYSTEM</div><div class="value">STATUS: ACTIVE</div></div>
-    <div class="card"><div class="label">ARCHIVE</div><div class="value">MEMORY STORAGE</div></div>
-    <div class="card"><div class="label">LOGS</div><div class="value">MESSAGE RECORD</div></div>
-    <div class="card"><div class="label">CAPSULE</div><div class="value">LOCKED</div></div>
+    <div class="card">SYSTEM: ACTIVE</div>
+    <div class="card">ARCHIVE: MEMORY STORAGE</div>
+    <div class="card">LOGS: MESSAGE RECORD</div>
+    <div class="card">CAPSULE: LOCKED</div>
   </div>
 
   <div class="section">
@@ -125,8 +150,10 @@ textarea{
   <div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
-<div id="archive" class="panel">
+<div id="archive" class="panel" style="position:relative;">
   <div class="title">ARCHIVE</div>
+
+  <button class="addBtn">+</button>
 
   <img src="final-match.jpg">
   <div class="caption">Final Match</div>
@@ -152,9 +179,7 @@ textarea{
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
 
-  <button onclick="tryAccess()" style="margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--border);width:100%">
-    UNLOCK
-  </button>
+  <button onclick="tryAccess()">UNLOCK</button>
 
   <div id="status" class="muted" style="margin-top:10px"></div>
   <div id="countdown" class="highlight" style="margin-top:6px"></div>
@@ -168,7 +193,11 @@ textarea{
 
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
-  <button id="loginBtn">LOGIN</button>
+
+  <div id="profileBox">
+    <button id="loginBtn">LOGIN</button>
+  </div>
+
   <div id="userInfo" class="highlight" style="margin-top:14px">NOT LOGGED IN</div>
 </div>
 
@@ -220,6 +249,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/fireba
 import { 
   getAuth, 
   signInWithPopup,
+  signOut,
   GoogleAuthProvider, 
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
@@ -235,49 +265,64 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
-// 🔥 POPUP LOGIN
-loginBtn.onclick = async () => {
-  try {
-    const result = await signInWithPopup(auth, provider);
-    userInfo.innerHTML = "USER: " + result.user.displayName;
-  } catch (err) {
-    alert("Login failed: " + err.message);
-  }
+// LOGIN
+document.getElementById("loginBtn").onclick = async () => {
+  await signInWithPopup(auth, provider);
 };
 
-// 🔥 AUTH STATE
+// AUTH STATE
 onAuthStateChanged(auth, (user) => {
-  userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
+  const profileBox = document.getElementById("profileBox");
+  const userInfo = document.getElementById("userInfo");
+
+  if(user){
+    userInfo.innerHTML = "USER: " + user.displayName;
+
+    profileBox.innerHTML = `<button id="logoutBtn">LOGOUT</button>`;
+
+    document.getElementById("logoutBtn").onclick = () => {
+      signOut(auth);
+    };
+
+  } else {
+    userInfo.innerHTML = "NOT LOGGED IN";
+
+    profileBox.innerHTML = `<button id="loginBtn">LOGIN</button>`;
+
+    document.getElementById("loginBtn").onclick = async () => {
+      await signInWithPopup(auth, provider);
+    };
+  }
 });
 
-// 🔥 LOGS
-logBtn.onclick = async () => {
+// LOGS
+document.getElementById("logBtn").onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login first");
 
-  if (!logInput.value.trim()) return;
+  const text = document.getElementById("logInput").value;
+  if (!text.trim()) return;
 
   await addDoc(collection(db, "logs"), {
-    text: logInput.value,
+    text: text,
     user: user.displayName
   });
 
-  logInput.value = "";
+  document.getElementById("logInput").value = "";
   loadLogs();
 };
 
 async function loadLogs(){
   const snap = await getDocs(collection(db, "logs"));
+  const container = document.getElementById("logsContainer");
 
-  if (snap.empty){
-    logsContainer.innerHTML = `<div class="muted">wow, so empty...</div>`;
-    return;
-  }
+  container.innerHTML = snap.empty
+    ? `<div class="muted">wow, so empty...</div>`
+    : "";
 
-  logsContainer.innerHTML = "";
   snap.forEach(doc=>{
     const d = doc.data();
-    logsContainer.innerHTML += `<div class="log">"${d.text}" — ${d.user}</div>`;
+    container.innerHTML += `<div class="log">"${d.text}" — ${d.user}</div>`;
   });
 }
 
