@@ -76,14 +76,6 @@ button:hover{
 img{width:100%;border-radius:8px;margin-top:10px}
 .caption{font-size:12px;color:var(--muted)}
 
-.captionRow{
-  display:flex;
-  justify-content:space-between;
-  font-size:12px;
-  color:var(--muted);
-  margin-bottom:8px;
-}
-
 .log{padding:8px 0;border-bottom:1px solid var(--border)}
 
 textarea{
@@ -109,6 +101,7 @@ textarea{
   color:var(--purple);
 }
 
+/* archive button position */
 #uploadBtn{
   float:right;
   margin-top:-28px;
@@ -155,15 +148,17 @@ textarea{
 <div id="archive" class="panel">
   <div class="title">ARCHIVE</div>
 
+  <!-- upload -->
   <input type="file" id="imageInput" style="display:none" accept="image/*">
-  <button id="uploadBtn">+ Add Photo</button>
+  <button id="uploadBtn">+</button>
 
-  <textarea id="captionInput" placeholder="Add caption (optional)..." style="display:none"></textarea>
-  <button id="postImageBtn" style="display:none;margin-top:8px;">POST</button>
-
-  <div id="uploadStatus" class="muted"></div>
-
+  <!-- dynamic images -->
   <div id="archiveContainer"></div>
+
+  <!-- existing images -->
+  <img src="final-match.jpg"><div class="caption">Final Match</div>
+  <img src="field-trip.jpg"><div class="caption">Field Trip</div>
+  <img src="workshop.jpg"><div class="caption">In the Workshop</div>
 </div>
 
 <div id="logs" class="panel">
@@ -239,7 +234,7 @@ import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChang
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const app = initializeApp({
-  apiKey: "AIzaSyD2eN...",
+  apiKey: "AIzaSyD2eNBRZk6KVo1SqxxpgNdltWUVRJCfzAA",
   authDomain: "astu-mechanical-portal.firebaseapp.com",
   projectId: "astu-mechanical-portal"
 });
@@ -248,16 +243,148 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
+const loginBtn = document.getElementById("loginBtn");
+const logoutBtn = document.getElementById("logoutBtn");
+const userInfo = document.getElementById("userInfo");
+
+const logInput = document.getElementById("logInput");
+const logBtn = document.getElementById("logBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+const logsContainer = document.getElementById("logsContainer");
+
+const imageInput = document.getElementById("imageInput");
+const uploadBtn = document.getElementById("uploadBtn");
+const archiveContainer = document.getElementById("archiveContainer");
+
+let editingId = null;
+
 loginBtn.onclick = () => signInWithPopup(auth, provider);
 logoutBtn.onclick = () => signOut(auth);
 
-onAuthStateChanged(auth, (user)=>{
-  userInfo.innerHTML = user ? "USER: "+user.displayName : "NOT LOGGED IN";
-  loginBtn.style.display = user ? "none":"block";
-  logoutBtn.style.display = user ? "block":"none";
+onAuthStateChanged(auth, (user) => {
+  if(user){
+    userInfo.innerHTML = "USER: " + user.displayName;
+    loginBtn.style.display = "none";
+    logoutBtn.style.display = "block";
+  } else {
+    userInfo.innerHTML = "NOT LOGGED IN";
+    loginBtn.style.display = "block";
+    logoutBtn.style.display = "none";
+  }
+
   loadLogs();
   loadArchive();
 });
+
+uploadBtn.onclick = ()=>{
+  if(!auth.currentUser) return alert("Login first");
+  imageInput.click();
+};
+
+imageInput.onchange = async ()=>{
+  const file = imageInput.files[0];
+  if(!file) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "astu_upload");
+
+  const res = await fetch("https://api.cloudinary.com/v1_1/djo2lhxqm/image/upload", {
+    method:"POST",
+    body:formData
+  });
+
+  const data = await res.json();
+
+  await addDoc(collection(db,"archive"),{
+    image:data.secure_url,
+    user:auth.currentUser.displayName
+  });
+
+  loadArchive();
+};
+
+async function loadArchive(){
+  const snap = await getDocs(collection(db,"archive"));
+  archiveContainer.innerHTML="";
+  snap.forEach(d=>{
+    archiveContainer.innerHTML += `<img src="${d.data().image}"><div class="caption">${d.data().user}</div>`;
+  });
+}
+
+logBtn.onclick = async () => {
+  if(!auth.currentUser) return alert("Login first");
+
+  const text = logInput.value;
+  if(!text.trim()) return;
+
+  if(editingId){
+    await updateDoc(doc(db,"logs",editingId),{ text });
+    editingId = null;
+    logBtn.innerText = "POST";
+    deleteBtn.style.display = "none";
+  } else {
+    await addDoc(collection(db,"logs"),{
+      text,
+      user: auth.currentUser.displayName,
+      uid: auth.currentUser.uid
+    });
+  }
+
+  logInput.value="";
+  loadLogs();
+};
+
+window.startEdit = (id, text) => {
+  editingId = id;
+  logInput.value = text;
+  logBtn.innerText = "SAVE";
+  deleteBtn.style.display = "block";
+};
+
+deleteBtn.onclick = async () => {
+  if(!editingId) return;
+
+  await deleteDoc(doc(db,"logs",editingId));
+
+  editingId = null;
+  logInput.value="";
+  logBtn.innerText = "POST";
+  deleteBtn.style.display = "none";
+
+  loadLogs();
+};
+
+async function loadLogs(){
+  const snap = await getDocs(collection(db,"logs"));
+  logsContainer.innerHTML = "";
+
+  if(snap.empty){
+    logsContainer.innerHTML = `<div class="muted">wow, so empty...</div>`;
+    return;
+  }
+
+  const currentUser = auth.currentUser;
+
+  snap.forEach(d=>{
+    const data = d.data();
+
+    let action = "";
+
+    if(currentUser && currentUser.uid === data.uid){
+      action = `<span class="iconBtn" onclick="startEdit('${d.id}','${data.text}')">✎</span>`;
+    } else {
+      action = `<span class="iconBtn">!</span>`;
+    }
+
+    logsContainer.innerHTML += `
+      <div class="log">
+        "${data.text}" — ${data.user}
+        ${action}
+      </div>
+    `;
+  });
+}
 </script>
 
 </body>
