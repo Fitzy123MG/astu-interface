@@ -47,7 +47,9 @@ button:hover{
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
-.nav button{flex:1;padding:12px}
+.nav button{
+  flex:1;padding:12px;
+}
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
@@ -85,6 +87,8 @@ textarea{
   color:var(--text);
   border:1px solid var(--border);
 }
+
+#logBtn{margin-top:8px;width:100%}
 
 .iconBtn{
   float:right;
@@ -155,12 +159,12 @@ textarea{
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
 
-  <button onclick="tryAccess()" style="margin-top:12px;">UNLOCK</button>
+  <button onclick="tryAccess()" style="margin-top:14px;">UNLOCK</button>
 
-  <div id="status" class="muted"></div>
-  <div id="countdown" class="highlight"></div>
+  <div id="status" class="muted" style="margin-top:12px"></div>
+  <div id="countdown" class="highlight" style="margin-top:10px"></div>
 
-  <div id="content" style="display:none">
+  <div id="content" style="display:none;margin-top:12px">
     FINAL WEEK<br>LATE NIGHTS<br>WORKSHOP DAY
   </div>
 </div>
@@ -188,13 +192,11 @@ const target=new Date("May 27, 2026 23:59:59").getTime()
 
 function tryAccess(){
   const now = Date.now();
-  const status = document.getElementById('status');
-
   if(now < target){
-    status.innerHTML = "ACCESS DENIED";
+    status.innerHTML="ACCESS DENIED";
   } else {
-    status.innerHTML = "ACCESS GRANTED";
-    document.getElementById('content').style.display = 'block';
+    status.innerHTML="ACCESS GRANTED";
+    content.style.display='block';
   }
 }
 
@@ -207,7 +209,7 @@ setInterval(()=>{
   const h=Math.floor((diff%86400000)/3600000)
   const m=Math.floor((diff%3600000)/60000)
 
-  document.getElementById('countdown').innerHTML=`${d}d ${h}h ${m}m remaining`
+  countdown.innerHTML=`${d}d ${h}h ${m}m remaining`
 },1000)
 </script>
 
@@ -230,6 +232,13 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userInfo = document.getElementById("userInfo");
 
+const logInput = document.getElementById("logInput");
+const logBtn = document.getElementById("logBtn");
+const deleteBtn = document.getElementById("deleteBtn");
+const logsContainer = document.getElementById("logsContainer");
+
+let editingId = null;
+
 loginBtn.onclick = () => signInWithPopup(auth, provider);
 logoutBtn.onclick = () => signOut(auth);
 
@@ -243,19 +252,11 @@ onAuthStateChanged(auth, (user) => {
     loginBtn.style.display = "block";
     logoutBtn.style.display = "none";
   }
+
   loadLogs();
 });
 
-let editingId = null;
-
-window.startEdit = (id, text) => {
-  editingId = id;
-  logInput.value = text;
-  logBtn.innerText = "SAVE";
-  deleteBtn.style.display = "block";
-};
-
-document.getElementById("logBtn").onclick = async () => {
+logBtn.onclick = async () => {
   if(!auth.currentUser) return alert("Login first");
 
   const text = logInput.value;
@@ -276,6 +277,13 @@ document.getElementById("logBtn").onclick = async () => {
 
   logInput.value="";
   loadLogs();
+};
+
+window.startEdit = (id, text) => {
+  editingId = id;
+  logInput.value = text;
+  logBtn.innerText = "SAVE";
+  deleteBtn.style.display = "block";
 };
 
 deleteBtn.onclick = async () => {
