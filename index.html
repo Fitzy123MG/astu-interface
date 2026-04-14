@@ -29,7 +29,6 @@ button, .card, .title, .log, .caption {
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
-/* ✅ BUTTON STYLE MATCHES NAV */
 button{
   border-radius:10px;
   border:1px solid var(--border);
@@ -48,9 +47,7 @@ button:hover{
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
-.nav button{
-  flex:1;padding:12px;
-}
+.nav button{flex:1;padding:12px}
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
@@ -89,18 +86,15 @@ textarea{
   border:1px solid var(--border);
 }
 
-#logBtn{
-  margin-top:8px;
-  width:100%;
+.iconBtn{
+  float:right;
+  cursor:pointer;
+  opacity:0.6;
+  font-weight:bold;
 }
-
-.addBtn{
-  position:absolute;
-  right:16px;
-  top:-10px;
-  width:36px;
-  height:36px;
-  border-radius:50%;
+.iconBtn:hover{
+  opacity:1;
+  color:var(--purple);
 }
 </style>
 </head>
@@ -118,7 +112,6 @@ textarea{
   <button onclick="tab('profile',this)">Profile</button>
 </div>
 
-<!-- HOME -->
 <div id="home" class="panel active">
   <div class="hero">
     <h1>ASTU MECHANICAL INTERFACE</h1>
@@ -135,43 +128,34 @@ textarea{
   <div class="bee">🐝</div>
 </div>
 
-<!-- SYSTEM -->
 <div id="system" class="panel">
   <div class="title">SYSTEM STATUS</div>
   <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
   <div class="muted">COHORT: ASTU MECHANICAL 2026</div>
+  <div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
-<!-- ARCHIVE -->
-<div id="archive" class="panel" style="position:relative;">
+<div id="archive" class="panel">
   <div class="title">ARCHIVE</div>
-  <button class="addBtn">+</button>
-
-  <img src="final-match.jpg">
-  <div class="caption">Final Match</div>
-
-  <img src="field-trip.jpg">
-  <div class="caption">Field Trip</div>
-
-  <img src="workshop.jpg">
-  <div class="caption">In the Workshop</div>
+  <img src="final-match.jpg"><div class="caption">Final Match</div>
+  <img src="field-trip.jpg"><div class="caption">Field Trip</div>
+  <img src="workshop.jpg"><div class="caption">In the Workshop</div>
 </div>
 
-<!-- LOGS -->
 <div id="logs" class="panel">
   <div class="title">LOG ENTRIES</div>
 
   <textarea id="logInput" placeholder="Write a message..."></textarea>
   <button id="logBtn">POST</button>
+  <button id="deleteBtn" style="display:none;margin-top:6px;">DELETE</button>
 
   <div id="logsContainer"></div>
 </div>
 
-<!-- CAPSULE -->
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
 
-  <button onclick="tryAccess()">UNLOCK</button>
+  <button onclick="tryAccess()" style="margin-top:12px;">UNLOCK</button>
 
   <div id="status" class="muted"></div>
   <div id="countdown" class="highlight"></div>
@@ -181,7 +165,6 @@ textarea{
   </div>
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
 
@@ -203,6 +186,18 @@ function tab(id,btn){
 
 const target=new Date("May 27, 2026 23:59:59").getTime()
 
+function tryAccess(){
+  const now = Date.now();
+  const status = document.getElementById('status');
+
+  if(now < target){
+    status.innerHTML = "ACCESS DENIED";
+  } else {
+    status.innerHTML = "ACCESS GRANTED";
+    document.getElementById('content').style.display = 'block';
+  }
+}
+
 setInterval(()=>{
   const now=Date.now()
   const diff=target-now
@@ -214,15 +209,6 @@ setInterval(()=>{
 
   document.getElementById('countdown').innerHTML=`${d}d ${h}h ${m}m remaining`
 },1000)
-
-function tryAccess(){
-  if(Date.now()<target){
-    status.innerHTML="ACCESS DENIED"
-  } else {
-    status.innerHTML="ACCESS GRANTED"
-    content.style.display='block'
-  }
-}
 </script>
 
 <script type="module">
@@ -244,13 +230,9 @@ const loginBtn = document.getElementById("loginBtn");
 const logoutBtn = document.getElementById("logoutBtn");
 const userInfo = document.getElementById("userInfo");
 
-// LOGIN
 loginBtn.onclick = () => signInWithPopup(auth, provider);
-
-// LOGOUT
 logoutBtn.onclick = () => signOut(auth);
 
-// AUTH STATE
 onAuthStateChanged(auth, (user) => {
   if(user){
     userInfo.innerHTML = "USER: " + user.displayName;
@@ -261,26 +243,54 @@ onAuthStateChanged(auth, (user) => {
     loginBtn.style.display = "block";
     logoutBtn.style.display = "none";
   }
+  loadLogs();
 });
 
-// POST LOG
+let editingId = null;
+
+window.startEdit = (id, text) => {
+  editingId = id;
+  logInput.value = text;
+  logBtn.innerText = "SAVE";
+  deleteBtn.style.display = "block";
+};
+
 document.getElementById("logBtn").onclick = async () => {
   if(!auth.currentUser) return alert("Login first");
 
   const text = logInput.value;
   if(!text.trim()) return;
 
-  await addDoc(collection(db,"logs"),{
-    text,
-    user: auth.currentUser.displayName,
-    uid: auth.currentUser.uid
-  });
+  if(editingId){
+    await updateDoc(doc(db,"logs",editingId),{ text });
+    editingId = null;
+    logBtn.innerText = "POST";
+    deleteBtn.style.display = "none";
+  } else {
+    await addDoc(collection(db,"logs"),{
+      text,
+      user: auth.currentUser.displayName,
+      uid: auth.currentUser.uid
+    });
+  }
 
   logInput.value="";
   loadLogs();
 };
 
-// LOAD LOGS
+deleteBtn.onclick = async () => {
+  if(!editingId) return;
+
+  await deleteDoc(doc(db,"logs",editingId));
+
+  editingId = null;
+  logInput.value="";
+  logBtn.innerText = "POST";
+  deleteBtn.style.display = "none";
+
+  loadLogs();
+};
+
 async function loadLogs(){
   const snap = await getDocs(collection(db,"logs"));
   logsContainer.innerHTML = "";
@@ -290,15 +300,17 @@ async function loadLogs(){
     return;
   }
 
+  const currentUser = auth.currentUser;
+
   snap.forEach(d=>{
     const data = d.data();
 
     let action = "";
 
-    if(auth.currentUser && auth.currentUser.uid === data.uid){
-      action = `<span style="float:right;cursor:pointer;" onclick="editLog('${d.id}','${data.text}')">✏️</span>`;
+    if(currentUser && currentUser.uid === data.uid){
+      action = `<span class="iconBtn" onclick="startEdit('${d.id}','${data.text}')">✎</span>`;
     } else {
-      action = `<span style="float:right;cursor:pointer;">⚠️</span>`;
+      action = `<span class="iconBtn">!</span>`;
     }
 
     logsContainer.innerHTML += `
@@ -309,22 +321,6 @@ async function loadLogs(){
     `;
   });
 }
-
-// EDIT / DELETE
-window.editLog = async (id, oldText)=>{
-  const input = prompt("Edit or type DELETE:", oldText);
-  if(!input) return;
-
-  if(input.toLowerCase()==="delete"){
-    await deleteDoc(doc(db,"logs",id));
-  }else{
-    await updateDoc(doc(db,"logs",id),{text:input});
-  }
-
-  loadLogs();
-};
-
-loadLogs();
 </script>
 
 </body>
