@@ -29,20 +29,28 @@ button, .card, .title, .log, .caption {
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
+/* 🔥 DARK BUTTON IMPROVEMENT (your request) */
+button{
+  background:#000;
+  color:#fff;
+  border:1px solid var(--border);
+}
+
+button:hover{
+  background:#111;
+}
+
 .container{max-width:900px;margin:auto;padding:18px}
 
 .nav{display:flex;gap:8px;margin-bottom:18px}
 .nav button{
   flex:1;padding:12px;border-radius:10px;
-  border:1px solid var(--border);
-  background:linear-gradient(to bottom,rgba(255,255,255,0.03),transparent);
+  background:#000;
   color:var(--muted);
-  transition:0.2s;
 }
 .nav button.active{
   color:var(--purple);
   border-color:var(--purple);
-  background:rgba(169,112,255,0.12);
 }
 
 .panel{display:none;background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:18px}
@@ -68,6 +76,16 @@ img{width:100%;border-radius:8px;margin-top:10px}
 .caption{font-size:12px;color:var(--muted);margin-bottom:8px}
 
 .log{padding:8px 0;border-bottom:1px solid var(--border)}
+
+textarea{
+  width:100%;
+  margin-top:10px;
+  padding:10px;
+  border-radius:10px;
+  background:#0a0a0a;
+  color:#fff;
+  border:1px solid var(--border);
+}
 </style>
 </head>
 
@@ -139,7 +157,7 @@ img{width:100%;border-radius:8px;margin-top:10px}
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
 
-  <button onclick="tryAccess()" style="margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--border);background:#0b0b11;color:var(--purple);width:100%">
+  <button onclick="tryAccess()" style="margin-top:6px;padding:10px;border-radius:8px;border:1px solid var(--border);width:100%">
     UNLOCK
   </button>
 
@@ -156,7 +174,7 @@ img{width:100%;border-radius:8px;margin-top:10px}
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
   <button id="loginBtn">LOGIN</button>
-  <div id="userInfo" class="muted" style="margin-top:10px">NOT LOGGED IN</div>
+  <div id="userInfo" class="highlight" style="margin-top:14px">NOT LOGGED IN</div>
 </div>
 
 </div>
@@ -227,33 +245,16 @@ const provider = new GoogleAuthProvider();
 
 await setPersistence(auth, browserLocalPersistence);
 
-// LOGIN
 loginBtn.onclick = () => {
   signInWithRedirect(auth, provider);
 };
 
-// DEBUG REDIRECT RESULT
-getRedirectResult(auth)
-  .then((result) => {
-    if (result && result.user) {
-      alert("LOGIN SUCCESS: " + result.user.displayName);
-    }
-  })
-  .catch((error) => {
-    alert("LOGIN ERROR: " + error.message);
-    console.error(error);
-  });
+getRedirectResult(auth).catch(console.error);
 
-// USER STATE
 onAuthStateChanged(auth, (user) => {
-  if (user) {
-    userInfo.innerHTML = "USER: " + user.displayName;
-  } else {
-    userInfo.innerHTML = "NOT LOGGED IN";
-  }
+  userInfo.innerHTML = user ? "USER: " + user.displayName : "NOT LOGGED IN";
 });
 
-// LOGS
 logBtn.onclick = async () => {
   const user = auth.currentUser;
   if (!user) return alert("Login first");
@@ -288,4 +289,4 @@ loadLogs();
 </script>
 
 </body>
-    </html>
+</html>
