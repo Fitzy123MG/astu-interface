@@ -25,7 +25,7 @@ body{
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
-button, .card, .title, .log {
+button, .card, .title, .log, .caption {
   font-family:'JetBrains Mono','Courier New',monospace;
 }
 
@@ -74,6 +74,7 @@ button:hover{
 .bee{margin-top:50px;text-align:center;font-size:26px;opacity:0.8}
 
 img{width:100%;border-radius:8px;margin-top:10px}
+.caption{font-size:12px;color:var(--muted)}
 
 .captionRow{
   display:flex;
@@ -101,6 +102,7 @@ textarea{
   float:right;
   cursor:pointer;
   opacity:0.6;
+  font-weight:bold;
 }
 .iconBtn:hover{
   opacity:1;
@@ -127,7 +129,6 @@ textarea{
   <button onclick="tab('profile',this)">Profile</button>
 </div>
 
-<!-- HOME -->
 <div id="home" class="panel active">
   <div class="hero">
     <h1>ASTU MECHANICAL INTERFACE</h1>
@@ -144,7 +145,6 @@ textarea{
   <div class="bee">🐝</div>
 </div>
 
-<!-- SYSTEM -->
 <div id="system" class="panel">
   <div class="title">SYSTEM STATUS</div>
   <div class="highlight">UNIVERSITY COMPLETION: 50%</div>
@@ -152,7 +152,6 @@ textarea{
   <div class="muted">STATUS: FINAL PHASE</div>
 </div>
 
-<!-- ARCHIVE -->
 <div id="archive" class="panel">
   <div class="title">ARCHIVE</div>
 
@@ -162,10 +161,11 @@ textarea{
   <textarea id="captionInput" placeholder="Add caption (optional)..." style="display:none"></textarea>
   <button id="postImageBtn" style="display:none;margin-top:8px;">POST</button>
 
+  <div id="uploadStatus" class="muted"></div>
+
   <div id="archiveContainer"></div>
 </div>
 
-<!-- LOGS -->
 <div id="logs" class="panel">
   <div class="title">LOG ENTRIES</div>
 
@@ -176,7 +176,6 @@ textarea{
   <div id="logsContainer"></div>
 </div>
 
-<!-- CAPSULE -->
 <div id="capsule" class="panel">
   <div class="title">TIME CAPSULE</div>
 
@@ -190,7 +189,6 @@ textarea{
   </div>
 </div>
 
-<!-- PROFILE -->
 <div id="profile" class="panel">
   <div class="title">PROFILE</div>
 
@@ -209,12 +207,36 @@ function tab(id,btn){
   document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'))
   btn.classList.add('active')
 }
+
+const target=new Date("May 27, 2026 23:59:59").getTime()
+
+function tryAccess(){
+  const now = Date.now();
+  if(now < target){
+    status.innerHTML="ACCESS DENIED";
+  } else {
+    status.innerHTML="ACCESS GRANTED";
+    content.style.display='block';
+  }
+}
+
+setInterval(()=>{
+  const now=Date.now()
+  const diff=target-now
+  if(diff<0)return
+
+  const d=Math.floor(diff/86400000)
+  const h=Math.floor((diff%86400000)/3600000)
+  const m=Math.floor((diff%3600000)/60000)
+
+  countdown.innerHTML=`${d}d ${h}h ${m}m remaining`
+},1000)
 </script>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-app.js";
 import { getAuth, signInWithPopup, signOut, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc, updateDoc } from "https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js";
 
 const app = initializeApp({
   apiKey: "AIzaSyD2eNBRZk6KVo1SqxxpgNdltWUVRJCfzAA",
@@ -229,11 +251,11 @@ const provider = new GoogleAuthProvider();
 loginBtn.onclick = () => signInWithPopup(auth, provider);
 logoutBtn.onclick = () => signOut(auth);
 
-const imageInput = document.getElementById("imageInput");
 const uploadBtn = document.getElementById("uploadBtn");
+const imageInput = document.getElementById("imageInput");
 const captionInput = document.getElementById("captionInput");
 const postImageBtn = document.getElementById("postImageBtn");
-const archiveContainer = document.getElementById("archiveContainer");
+const uploadStatus = document.getElementById("uploadStatus");
 
 let selectedFile = null;
 
@@ -253,6 +275,9 @@ imageInput.onchange = ()=>{
 postImageBtn.onclick = async ()=>{
   if(!selectedFile) return;
 
+  uploadStatus.innerHTML = "Uploading...";
+  postImageBtn.disabled = true;
+
   const formData = new FormData();
   formData.append("file", selectedFile);
   formData.append("upload_preset", "astu_upload");
@@ -269,6 +294,9 @@ postImageBtn.onclick = async ()=>{
     caption: captionInput.value || "",
     user: auth.currentUser.displayName
   });
+
+  uploadStatus.innerHTML = "";
+  postImageBtn.disabled = false;
 
   captionInput.value="";
   captionInput.style.display="none";
@@ -300,7 +328,32 @@ async function loadArchive(){
   });
 }
 
-onAuthStateChanged(auth, loadArchive);
+async function loadLogs(){
+  const snap = await getDocs(collection(db,"logs"));
+  logsContainer.innerHTML = "";
+
+  snap.forEach(d=>{
+    const data = d.data();
+    logsContainer.innerHTML += `<div class="log">"${data.text}"</div>`;
+  });
+}
+
+logBtn.onclick = async ()=>{
+  if(!auth.currentUser) return alert("Login first");
+
+  await addDoc(collection(db,"logs"),{
+    text: logInput.value,
+    user: auth.currentUser.displayName
+  });
+
+  logInput.value="";
+  loadLogs();
+};
+
+onAuthStateChanged(auth, ()=>{
+  loadLogs();
+  loadArchive();
+});
 </script>
 
 </body>
